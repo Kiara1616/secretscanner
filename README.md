@@ -93,6 +93,23 @@ Añade la siguiente configuración al archivo de configuración de tu Agente (ej
 }
 ```
 
+## Extensión de Visual Studio Code
+
+Este proyecto incluye una **Extensión oficial para VSCode** que subraya en rojo los secretos directamente en el código fuente.
+
+### Instalación
+1. Dirígete a la carpeta `vscode-extension/` en este repositorio.
+2. Encuentra el archivo compilado `secret-scanner-vscode-1.0.0.vsix`.
+3. Instálalo en Visual Studio Code: 
+   - Abre VSCode > Panel de Extensiones (Ctrl+Shift+X).
+   - Haz clic en los tres puntos `...` arriba a la derecha > **Install from VSIX...**
+   - Selecciona el archivo `.vsix`.
+
+### Uso
+La extensión se activará automáticamente y escuchará cada vez que guardes un archivo (`Ctrl+S`). Si tu archivo contiene una contraseña o un token que rompe las reglas, aparecerá un subrayado rojo (Warning/Error) directamente en el editor. También puedes invocar manualmente el escaneo con el comando de VSCode: `SecretScanner: Scan Current File`.
+
+*(Nota: Debes tener instalado `secret-scanner-cl` globalmente vía `pip` para que la extensión funcione).*
+
 ## Ejemplo de salida
 🔍 Analizando: ./mi_proyecto
 
