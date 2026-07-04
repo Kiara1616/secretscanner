@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-  {name = "Nodiex Security", email = "security@nodiex.com"}
+  {name = "Kiara", email = "kiara@example.com"}
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

@@ -110,6 +110,22 @@ La extensión se activará automáticamente y escuchará cada vez que guardes un
 
 *(Nota: Debes tener instalado `secret-scanner-cl` globalmente vía `pip` para que la extensión funcione).*
 
+## Integración con `pre-commit` (Git Hooks)
+
+Puedes integrar este escáner de secretos directamente en tu flujo de trabajo de Git utilizando el framework oficial [pre-commit](https://pre-commit.com/). Esto evitará que hagas `git commit` accidentalmente si hay contraseñas en tu código.
+
+Para usarlo, añade lo siguiente a tu archivo `.pre-commit-config.yaml` en tu repositorio:
+
+```yaml
+repos:
+-   repo: https://github.com/Kiara1616/secret-scanner
+    rev: v1.0.0 # Asegúrate de usar la última versión disponible (o la rama main)
+    hooks:
+    -   id: secret-scanner
+```
+
+Luego ejecuta `pre-commit install` en tu terminal para activar el hook.
+
 ## Ejemplo de salida
 🔍 Analizando: ./mi_proyecto
 
