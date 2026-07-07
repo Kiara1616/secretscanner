@@ -1,7 +1,7 @@
 startCommand:
   type: stdio
   config:
-    command: python
+    command: uv
     args:
-      - -m
-      - secret_scanner.mcp_server
+      - run
+      - secret-scanner-mcp
