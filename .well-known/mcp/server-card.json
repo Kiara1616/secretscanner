@@ -1,0 +1,8 @@
+{
+  "name": "secret-scanner-mcp",
+  "version": "1.0.1",
+  "description": "SecretScanner MCP Server",
+  "capabilities": {
+    "tools": {}
+  }
+}
