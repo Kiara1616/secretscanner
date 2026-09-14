@@ -4,17 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "secret-scanner-cl"
-version = "1.0.1"
+version = "1.0.2"
 description = "CLI tool that detects hardcoded secrets and credentials in source code."
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
-  {name = "Kiara", email = "kiara@example.com"}
+  {name = "Kiara Zapana"}
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
@@ -23,8 +22,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Kiara1616/secret-scanner"
-Repository = "https://github.com/Kiara1616/secret-scanner"
+Homepage = "https://github.com/Kiara1616/secretscanner"
+Repository = "https://github.com/Kiara1616/secretscanner"
+Issues = "https://github.com/Kiara1616/secretscanner/issues"
+Changelog = "https://github.com/Kiara1616/secretscanner/releases"
 
 [project.scripts]
 secret-scanner = "secret_scanner.main:main"

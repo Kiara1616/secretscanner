@@ -50,7 +50,7 @@ def _banner() -> None:
             Fore.CYAN + Style.BRIGHT,
         )
     )
-    print(_colored("  SecretScanner v1.0.0 - Hardcoded Secret Detector\n", Fore.WHITE))
+    print(_colored("  SecretScanner v1.0.2 - Hardcoded Secret Detector\n", Fore.WHITE))
 
 
 def _build_parser() -> argparse.ArgumentParser:
