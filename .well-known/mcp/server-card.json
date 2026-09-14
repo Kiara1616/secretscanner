@@ -1,0 +1,24 @@
+{
+  "serverInfo": {
+    "name": "secret-scanner",
+    "version": "1.0.1"
+  },
+  "tools": [
+    {
+      "name": "scan_secrets",
+      "description": "Escanea un directorio o archivo en busca de contraseñas, tokens y claves API hardcodeadas.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "target_path": {
+            "type": "string",
+            "description": "Ruta absoluta o relativa al archivo o carpeta que se desea analizar."
+          }
+        },
+        "required": ["target_path"]
+      }
+    }
+  ],
+  "prompts": [],
+  "resources": []
+}

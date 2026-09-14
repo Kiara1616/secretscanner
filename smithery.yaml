@@ -1,0 +1,7 @@
+startCommand:
+  type: stdio
+  config:
+    command: uv
+    args:
+      - run
+      - secret-scanner-mcp

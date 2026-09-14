@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "secret-scanner-cl"
+version = "1.0.1"
+description = "CLI tool that detects hardcoded secrets and credentials in source code."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+  {name = "Kiara", email = "kiara@example.com"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "colorama>=0.4.6",
+    "mcp>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Kiara1616/secret-scanner"
+Repository = "https://github.com/Kiara1616/secret-scanner"
+
+[project.scripts]
+secret-scanner = "secret_scanner.main:main"
+secret-scanner-mcp = "secret_scanner.mcp_server:main"
+
+# ── pytest + coverage ──────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "--cov=secret_scanner.scanner",
+    "--cov-report=term-missing",
+    "--cov-fail-under=80",
+    "-v",
+]
+
+[tool.coverage.run]
+source = ["src/secret_scanner/scanner"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80

@@ -1,0 +1,7 @@
+-   id: secret-scanner
+    name: Secret Scanner
+    description: Escanea secretos y credenciales hardcodeadas en tu código antes de hacer commit.
+    entry: secret-scanner
+    language: python
+    types: [text]
+    args: [--output, json]

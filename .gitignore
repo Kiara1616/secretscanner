@@ -1,0 +1,98 @@
+# =============================================================================
+# SecretScanner — .gitignore
+# Universidad Privada de Tacna (UPT) · SI784 · 2026-I
+# =============================================================================
+
+# ── 1. Entornos virtuales ─────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+.env_local/
+virtualenv/
+
+# ── 2. Variables de entorno y secretos reales ─────────────────────────────────
+# CRÍTICO: Este proyecto analiza secretos — jamás versionar credenciales reales.
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+.env.development
+secrets.json
+secrets.yaml
+secrets.toml
+credentials.json
+config.local.py
+*.pem
+*.key
+*.p12
+*.pfx
+
+# ── 3. Archivos de herramientas de IA ─────────────────────────────────────────
+# Estas carpetas pueden contener contexto sensible del proyecto.
+.opencode/
+opencode.jsonc
+.cursor/
+.aider
+.aider*
+.aider.chat.history.md
+.copilot/
+.continue/
+.codeium/
+.tabnine/
+.github/copilot-instructions.md
+
+# ── 4. Output del analizador (reportes generados por el scanner) ──────────────
+# Los reportes se generan en output/ — no deben versionarse.
+output/
+*.report.json
+*.report.csv
+
+# ── 5. Python estándar ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+MANIFEST
+pip-wheel-metadata/
+share/python-wheels/
+
+# ── 6. Cobertura y tests ──────────────────────────────────────────────────────
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+nosetests.xml
+test-results/
+*.coveragerc
+
+# ── 7. IDEs y editores ────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ── 8. Logs ───────────────────────────────────────────────────────────────────
+*.log
+logs/
+log/
