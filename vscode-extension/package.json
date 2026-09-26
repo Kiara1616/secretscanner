@@ -45,9 +45,9 @@
     "test": "npm run compile"
   },
   "devDependencies": {
-    "@types/node": "^18.x",
-    "@types/vscode": "^1.85.0",
-    "@vscode/vsce": "^3.2.1",
-    "typescript": "^5.3.3"
+    "@types/node": "^26.x",
+    "@types/vscode": "^1.138.0",
+    "@vscode/vsce": "^4.0.0",
+    "typescript": "^7.0.2"
   }
 }
