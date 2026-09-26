@@ -12,7 +12,7 @@ jobs:
     name: Build distributions
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
       attestations: write
     steps:
@@ -22,15 +22,32 @@ jobs:
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: vscode-extension/package-lock.json
       - name: Build and verify distributions
         run: |
           python -m pip install --upgrade build twine
           python -m build
           python -m twine check dist/*
+      - name: Build VS Code extension
+        working-directory: vscode-extension
+        run: |
+          npm ci
+          npm run package
       - name: Attest build provenance
         uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
         with:
-          subject-path: "dist/*"
+          subject-path: |
+            dist/*
+            vscode-extension/*.vsix
+      - name: Attach packages to GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/* vscode-extension/*.vsix --clobber
       - name: Upload distributions
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
