@@ -6,13 +6,9 @@ Verifies that export_json and export_csv create correct output files.
 
 import csv
 import json
-import os
 from pathlib import Path
 
-import pytest
-
-from secret_scanner.scanner.reporter import export_json, export_csv
-
+from secret_scanner.scanner.reporter import export_csv, export_json
 
 # ── Fixtures ───────────────────────────────────────────────────────────────
 SAMPLE_FINDINGS = [

@@ -4,11 +4,9 @@ tests/test_file_scanner.py – Tests for scanner/file_scanner.py
 Uses pytest's tmp_path fixture to create temporary files and directories.
 """
 
-import os
-import pytest
 from pathlib import Path
 
-from secret_scanner.scanner.file_scanner import scan_path, _mask_secret, _is_text_file
+from secret_scanner.scanner.file_scanner import _is_text_file, _mask_secret, scan_path
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
-# SecretScan PR
+# SecretScanner for Visual Studio Code
 
-**SecretScan PR** is a powerful VS Code extension that detects API keys, tokens, and other secrets in your codebase to prevent accidental leaks.
+SecretScanner detects API keys, tokens and credentials while you work, using the open-source `secret-scanner-cl` engine locally on your computer.
 
 ## Features
 - **Real-time scanning:** Automatically detects hardcoded secrets (API keys, tokens, credentials) on file save.
@@ -8,22 +8,17 @@
 - **Cross-platform support:** Works seamlessly on Windows, Linux, and macOS.
 - **Command Palette Integration:** Easily trigger manual scans across your current file.
 
-## Configuration
-Customize the extension from VS Code settings (coming soon):
-- `secret-scanner.autoScanOnSave`: Automatically scan when a file is saved (Default: `true`)
-
 ## Commands
 Use the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`):
 - `SecretScanner: Scan Current File`
 
-## 📦 Requirements & Setup
+## Requirements and setup
 This extension acts as an intelligent bridge to the `secret-scanner-cl` Python CLI.
 
 ### Prerequisites
 You must have Python installed on your system.
 
-### Automatic Global Installation
-For the extension to work, simply install the core scanner globally via pip:
+Install the scanner CLI and ensure `secret-scanner` is available on your `PATH`:
 
 ```bash
 pip install secret-scanner-cl
@@ -36,5 +31,10 @@ Once installed, the extension will automatically detect the `secret-scanner` com
 2. The CLI returns a detailed JSON report.
 3. The extension parses the report and maps the vulnerabilities to precise line numbers in your editor.
 
-## 🤝 Connect with Us
-[GitHub Repository](https://github.com/Kiara1616/secret-scanner)
+## Privacy
+
+Scanning is performed locally. The extension does not upload source code or findings.
+
+## Support
+
+Report bugs and request features in the [GitHub repository](https://github.com/Kiara1616/secretscanner/issues). See the project's [security policy](https://github.com/Kiara1616/secretscanner/security/policy) for vulnerabilities.

@@ -6,7 +6,7 @@ file_scanner.py – Recursive file scanner that applies PATTERNS to every
 import os
 import re
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
 
 from secret_scanner.scanner.patterns import PATTERNS
 
@@ -51,7 +51,7 @@ def _is_text_file(filepath: Path) -> bool:
         return False
 
 
-def scan_path(path: str, verbose: bool = False) -> List[Dict[str, Any]]:
+def scan_path(path: str, verbose: bool = False) -> list[dict[str, Any]]:
     """
     Recursively scan *path* for secrets.
 
@@ -72,7 +72,7 @@ def scan_path(path: str, verbose: bool = False) -> List[Dict[str, Any]]:
             line     – 1-based line number (int)
             content  – masked line content (str)
     """
-    findings: List[Dict[str, Any]] = []
+    findings: list[dict[str, Any]] = []
     root = Path(path).resolve()
 
     # Build the list of files to inspect
@@ -93,9 +93,9 @@ def scan_path(path: str, verbose: bool = False) -> List[Dict[str, Any]]:
     return findings
 
 
-def _walk_directory(root: Path) -> List[Path]:
+def _walk_directory(root: Path) -> list[Path]:
     """Walk *root* skipping ignored directories and return all file paths."""
-    result: List[Path] = []
+    result: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
         # Prune ignored directories in-place so os.walk won't descend into them
         dirnames[:] = [
@@ -106,10 +106,10 @@ def _walk_directory(root: Path) -> List[Path]:
     return result
 
 
-def _scan_file(filepath: Path, findings: List[Dict[str, Any]]) -> None:
+def _scan_file(filepath: Path, findings: list[dict[str, Any]]) -> None:
     """Read *filepath* line-by-line and append any matches to *findings*."""
     try:
-        with open(filepath, "r", encoding="utf-8", errors="replace") as fh:
+        with open(filepath, encoding="utf-8", errors="replace") as fh:
             for lineno, line in enumerate(fh, start=1):
                 for pat in PATTERNS:
                     if pat["pattern"].search(line):

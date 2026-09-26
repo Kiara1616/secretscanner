@@ -1,9 +1,19 @@
 {
-  "name": "secret-scanner-pr",
-  "displayName": "SecretScan PR",
+  "name": "secret-scanner",
+  "displayName": "SecretScanner",
   "description": "Visual Studio Code extension to highlight hardcoded secrets, passwords and API keys in your code using SecretScanner.",
-  "version": "1.0.5",
-  "publisher": "kiara",
+  "version": "1.0.2",
+  "publisher": "Kiara1616",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kiara1616/secretscanner.git"
+  },
+  "homepage": "https://github.com/Kiara1616/secretscanner#readme",
+  "bugs": {
+    "url": "https://github.com/Kiara1616/secretscanner/issues"
+  },
+  "keywords": ["security", "secrets", "devsecops", "credentials", "linter"],
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.85.0"
@@ -11,6 +21,10 @@
   "categories": [
     "Linters"
   ],
+  "galleryBanner": {
+    "color": "#0d1117",
+    "theme": "dark"
+  },
   "activationEvents": [
     "onStartupFinished"
   ],
@@ -27,11 +41,13 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint"
+    "package": "npx @vscode/vsce package",
+    "test": "npm run compile"
   },
   "devDependencies": {
     "@types/node": "^18.x",
     "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.1",
     "typescript": "^5.3.3"
   }
 }

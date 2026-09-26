@@ -1,0 +1,43 @@
+name: Bug report
+description: Report a reproducible problem in SecretScanner.
+title: "[Bug]: "
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: Never paste real credentials or an unsanitized SecretScanner report.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      placeholder: Use fake values in all examples.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: SecretScanner version
+      placeholder: "1.0.2"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Windows 11, Python 3.12
+    validations:
+      required: true
+  - type: checkboxes
+    id: sanitized
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed or masked every real credential from this report.
+          required: true

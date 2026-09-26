@@ -4,9 +4,8 @@ reporter.py – Export scan findings to JSON or CSV files.
 
 import csv
 import json
-import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 OUTPUT_DIR = "output"
 
@@ -17,7 +16,7 @@ def _ensure_output_dir(output_path: str) -> None:
     parent.mkdir(parents=True, exist_ok=True)
 
 
-def export_json(findings: List[Dict[str, Any]], output_path: str) -> None:
+def export_json(findings: list[dict[str, Any]], output_path: str) -> None:
     """
     Serialize *findings* to a JSON file at *output_path*.
 
@@ -35,7 +34,7 @@ def export_json(findings: List[Dict[str, Any]], output_path: str) -> None:
         json.dump(findings, fh, indent=2, ensure_ascii=False)
 
 
-def export_csv(findings: List[Dict[str, Any]], output_path: str) -> None:
+def export_csv(findings: list[dict[str, Any]], output_path: str) -> None:
     """
     Write *findings* to a CSV file at *output_path*.
 

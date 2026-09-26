@@ -20,10 +20,11 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     except AttributeError:
         pass
 
-from colorama import Fore, Style, init as colorama_init
+from colorama import Fore, Style
+from colorama import init as colorama_init
 
 from secret_scanner.scanner.file_scanner import scan_path
-from secret_scanner.scanner.reporter import export_json, export_csv
+from secret_scanner.scanner.reporter import export_csv, export_json
 
 # ── Colour helpers ─────────────────────────────────────────────────────────
 SEVERITY_COLOR = {
@@ -112,7 +113,8 @@ def _print_summary(
     print(_colored(separator, Fore.GREEN))
 
     if count == 0:
-        print(_colored("  [OK] No secrets found. Your project looks clean!", Fore.GREEN + Style.BRIGHT))
+        message = "  [OK] No secrets found. Your project looks clean!"
+        print(_colored(message, Fore.GREEN + Style.BRIGHT))
     else:
         print(
             _colored(
@@ -138,7 +140,7 @@ def _count_files(path: str) -> int:
     total = 0
     ignored_dirs = {".git", "__pycache__", "node_modules", "output",
                     ".venv", "venv", ".tox", "dist", "build", ".mypy_cache"}
-    for dirpath, dirnames, filenames in os.walk(root):
+    for _dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in ignored_dirs]
         total += len(filenames)
     return total

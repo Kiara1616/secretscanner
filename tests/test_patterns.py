@@ -6,7 +6,6 @@ Each pattern is tested with:
   - At least one string that should NOT match (no false positive)
 """
 
-import pytest
 from secret_scanner.scanner.patterns import PATTERNS
 
 # Build a convenience dict: name → compiled pattern

@@ -3,76 +3,79 @@
 [![CI](https://github.com/Kiara1616/secretscanner/actions/workflows/ci.yml/badge.svg)](https://github.com/Kiara1616/secretscanner/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/secret-scanner-cl.svg)](https://pypi.org/project/secret-scanner-cl/)
 [![Python](https://img.shields.io/pypi/pyversions/secret-scanner-cl.svg)](https://pypi.org/project/secret-scanner-cl/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Security policy](https://img.shields.io/badge/security-policy-green.svg)](SECURITY.md)
 
-SecretScanner es una herramienta de código abierto para detectar secretos y credenciales hardcodeadas en código fuente. Incluye una CLI para Python, integración con `pre-commit`, un servidor MCP y una extensión para Visual Studio Code.
+**Detecta credenciales antes de que lleguen al repositorio.** SecretScanner es un escáner local y de código abierto para encontrar secretos hardcodeados mediante CLI, `pre-commit`, MCP y Visual Studio Code.
 
-## Características
-
-- Analiza archivos individuales o directorios completos.
-- Detecta tokens de GitHub y Slack, claves de AWS, JWT, contraseñas, API keys, claves RSA y URL con credenciales.
-- Clasifica los hallazgos por severidad y omite directorios y formatos irrelevantes.
-- Exporta resultados en JSON o CSV.
-- Devuelve un código de salida distinto de cero cuando encuentra secretos, útil para CI.
-- Se integra con agentes compatibles con MCP y con hooks de `pre-commit`.
+```text
+$ secret-scanner --path .
+[HIGH] GitHub Token · src/config.py:12
+[!] 1 posible secreto encontrado
+```
 
 > [!IMPORTANT]
-> Los resultados pueden incluir falsos positivos. Revisa cada hallazgo y revoca inmediatamente cualquier credencial real expuesta.
+> SecretScanner está en fase beta. Sus hallazgos requieren revisión humana: puede producir falsos positivos y no reemplaza la rotación inmediata de una credencial expuesta.
 
-## Instalación
+## Por qué SecretScanner
 
-Requiere Python 3.10 o superior.
+- **Local primero:** el código y los hallazgos permanecen en tu equipo.
+- **Un motor, varios flujos:** CLI, hook de Git, servidor MCP y extensión para VS Code.
+- **Listo para automatización:** códigos de salida apropiados y reportes JSON o CSV.
+- **Multiplataforma:** compatible con Windows, Linux y macOS mediante Python 3.10 o posterior.
+
+## Inicio rápido
+
+Instala el paquete desde PyPI:
 
 ```bash
 pip install secret-scanner-cl
-```
-
-También puedes instalarlo en un entorno aislado:
-
-```bash
-pipx install secret-scanner-cl
-```
-
-## Uso de la CLI
-
-```bash
-# Analizar el directorio actual
 secret-scanner --path .
+```
 
-# Analizar una ruta y exportar un reporte JSON
-secret-scanner --path ./mi-proyecto --output json
+También puedes mantenerlo aislado con `pipx install secret-scanner-cl`.
 
-# Exportar CSV y mostrar cada archivo procesado
-secret-scanner --path ./mi-proyecto --output csv --verbose
+### Comandos
+
+```bash
+# Analizar un archivo o directorio
+secret-scanner --path ./mi-proyecto
+
+# Exportar los hallazgos
+secret-scanner --path . --output json
+secret-scanner --path . --output csv
+
+# Mostrar cada archivo procesado
+secret-scanner --path . --verbose
 ```
 
 | Opción | Descripción |
 | --- | --- |
-| `--path PATH` | Archivo o directorio que se analizará. Es obligatorio. |
+| `--path PATH` | Archivo o directorio que se analizará. |
 | `--output json` | Guarda los hallazgos en `output/report.json`. |
 | `--output csv` | Guarda los hallazgos en `output/report.csv`. |
-| `--verbose` | Muestra los archivos mientras se procesan. |
+| `--verbose` | Muestra los archivos a medida que se procesan. |
 
-El comando termina con código `1` cuando detecta al menos un posible secreto y con código `0` cuando no encuentra ninguno.
+El proceso termina con código `1` si encuentra posibles secretos y `0` si no encuentra ninguno, por lo que puede utilizarse como control en CI.
 
-## Patrones detectados
+## Detectores incluidos
 
 | Tipo | Severidad |
 | --- | --- |
-| GitHub Token | Alta |
+| Token de GitHub | Alta |
 | AWS Access Key | Alta |
-| API Key genérica | Media |
+| API key genérica | Media |
 | Contraseña hardcodeada | Alta |
-| JWT | Alta |
-| Slack Token | Alta |
+| JSON Web Token | Alta |
+| Token de Slack | Alta |
 | Clave privada RSA | Alta |
 | URL con credenciales | Media |
 
-SecretScanner ignora automáticamente directorios como `.git`, `node_modules`, `.venv`, `dist`, `build` y `output`, además de formatos binarios comunes.
+El escáner omite `.git`, `node_modules`, entornos virtuales, artefactos de construcción y formatos binarios comunes.
 
-## Integración con `pre-commit`
+## Pre-commit
 
-Añade esta configuración a `.pre-commit-config.yaml`:
+Añade el hook al archivo `.pre-commit-config.yaml`. Sustituye `v1.0.2` por el release estable que quieras fijar:
 
 ```yaml
 repos:
@@ -82,15 +85,11 @@ repos:
       - id: secret-scanner
 ```
 
-Después instala el hook:
+Después ejecuta `pre-commit install`. El hook analiza el repositorio antes de permitir el commit.
 
-```bash
-pre-commit install
-```
+## MCP
 
-## Servidor MCP
-
-El paquete instala el comando `secret-scanner-mcp`, que expone la herramienta mediante entrada y salida estándar (`stdio`).
+El comando `secret-scanner-mcp` expone el escáner mediante transporte estándar `stdio`:
 
 ```json
 {
@@ -103,14 +102,18 @@ El paquete instala el comando `secret-scanner-mcp`, que expone la herramienta me
 }
 ```
 
-## Extensión de Visual Studio Code
+## Visual Studio Code
 
-La carpeta `vscode-extension/` contiene una extensión que analiza el archivo activo y señala posibles secretos en el editor. Para usarla:
+La extensión se encuentra en [`vscode-extension/`](vscode-extension/). Mientras se completa su publicación en Marketplace, puede generarse localmente:
 
-1. Instala primero la CLI con `pip install secret-scanner-cl`.
-2. Descarga el archivo `.vsix` más reciente desde la sección **Assets** del último release.
-3. En Visual Studio Code abre **Extensions → ··· → Install from VSIX...**.
-4. Ejecuta **SecretScanner: Scan Current File** desde la paleta de comandos.
+```bash
+pip install secret-scanner-cl
+cd vscode-extension
+npm ci
+npm run package
+```
+
+Instala el archivo VSIX resultante desde **Extensions → ··· → Install from VSIX...**. El VSIX es un artefacto de release y no se almacena en Git.
 
 ## Desarrollo
 
@@ -118,24 +121,21 @@ La carpeta `vscode-extension/` contiene una extensión que analiza el archivo ac
 git clone https://github.com/Kiara1616/secretscanner.git
 cd secretscanner
 python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# Linux o macOS
-source .venv/bin/activate
-
-pip install -r requirements.txt
-pip install -e .
+python -m pip install -e ".[dev]"
 pytest
+ruff check .
 ```
 
-Las pruebas exigen al menos 80 % de cobertura sobre el módulo del escáner.
+La matriz de CI valida Python 3.10–3.13, cobertura mínima de 80 %, estilo, compilación de la extensión y distribuciones para PyPI. Consulta [CONTRIBUTING.md](CONTRIBUTING.md) antes de enviar cambios.
 
-## Publicación
+## Seguridad y soporte
 
-Las versiones estables se publican en [PyPI](https://pypi.org/project/secret-scanner-cl/) y se generan automáticamente cuando se publica un release en GitHub. El número de versión de `pyproject.toml` debe coincidir con el tag del release.
+No publiques credenciales reales en issues, ejemplos ni reportes. Las vulnerabilidades deben comunicarse en privado siguiendo [SECURITY.md](SECURITY.md). Para preguntas de uso consulta [SUPPORT.md](SUPPORT.md).
+
+## Estado del proyecto
+
+La hoja de ruta inmediata incluye configuración por proyecto, allowlists, baseline, fingerprints, historial Git y salida SARIF. Consulta [CHANGELOG.md](CHANGELOG.md) para conocer los cambios publicados.
 
 ## Licencia
 
-Distribuido bajo la licencia MIT. Consulta [LICENSE](LICENSE).
+SecretScanner se distribuye bajo la [licencia MIT](LICENSE).

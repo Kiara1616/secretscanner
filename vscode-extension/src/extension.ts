@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -46,9 +46,16 @@ function scanDocument(document: vscode.TextDocument) {
 
     // Run the Python CLI tool
     const targetPath = document.fileName;
-    const command = `secret-scanner --path "${targetPath}" --output json`;
+    const args = ['--path', targetPath, '--output', 'json'];
 
-    exec(command, { cwd }, (error, stdout, stderr) => {
+    execFile('secret-scanner', args, { cwd }, (error, stdout, stderr) => {
+        if (error && error.code !== 1) {
+            const detail = stderr.trim() || error.message;
+            void vscode.window.showErrorMessage(`SecretScanner could not run: ${detail}`);
+            diagnosticCollection.delete(document.uri);
+            return;
+        }
+
         // Even if there's an error (exit code 1 = secrets found), we still check the report.
         if (fs.existsSync(reportPath)) {
             try {

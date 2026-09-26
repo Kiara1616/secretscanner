@@ -4,6 +4,7 @@ Expone la funcionalidad de escaneo como una herramienta para Agentes de IA.
 """
 
 from mcp.server.fastmcp import FastMCP
+
 from secret_scanner.scanner.file_scanner import scan_path
 
 # Inicializar el servidor MCP

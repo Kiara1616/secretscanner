@@ -1,3 +1,2 @@
-colorama>=0.4.6
-pytest>=8.0.0
-pytest-cov>=5.0.0
+# Development dependencies. Runtime dependencies are declared in pyproject.toml.
+-e .[dev]
