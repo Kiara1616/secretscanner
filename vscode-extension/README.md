@@ -2,6 +2,8 @@
 
 SecretScanner detects API keys, tokens and credentials while you work, using the open-source `secret-scanner-cl` engine locally on your computer.
 
+[Install from Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=kiara.secret-scanner-pr)
+
 ## Features
 - **Real-time scanning:** Automatically detects hardcoded secrets (API keys, tokens, credentials) on file save.
 - **Visual Feedback:** Highlights exposed secrets directly in your editor with warning/error squiggles.

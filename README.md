@@ -3,6 +3,7 @@
 [![CI](https://github.com/Kiara1616/secretscanner/actions/workflows/ci.yml/badge.svg)](https://github.com/Kiara1616/secretscanner/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/secret-scanner-cl.svg)](https://pypi.org/project/secret-scanner-cl/)
 [![Python](https://img.shields.io/pypi/pyversions/secret-scanner-cl.svg)](https://pypi.org/project/secret-scanner-cl/)
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/kiara.secret-scanner-pr?label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=kiara.secret-scanner-pr)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Security policy](https://img.shields.io/badge/security-policy-green.svg)](SECURITY.md)
 
@@ -104,16 +105,25 @@ El comando `secret-scanner-mcp` expone el escáner mediante transporte estándar
 
 ## Visual Studio Code
 
-La extensión se encuentra en [`vscode-extension/`](vscode-extension/). Mientras se completa su publicación en Marketplace, puede generarse localmente:
+Instala [SecretScanner desde Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=kiara.secret-scanner-pr) o ejecuta:
+
+```bash
+code --install-extension kiara.secret-scanner-pr
+```
+
+La extensión utiliza la CLI local, por lo que también debes instalar el paquete de Python:
 
 ```bash
 pip install secret-scanner-cl
+```
+
+Para generar un VSIX durante el desarrollo:
+
+```bash
 cd vscode-extension
 npm ci
 npm run package
 ```
-
-Instala el archivo VSIX resultante desde **Extensions → ··· → Install from VSIX...**. El VSIX es un artefacto de release y no se almacena en Git.
 
 ## Desarrollo
 
