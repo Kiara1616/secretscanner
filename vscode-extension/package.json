@@ -1,9 +1,9 @@
 {
-  "name": "secret-scanner",
+  "name": "secret-scanner-pr",
   "displayName": "SecretScanner",
-  "description": "Visual Studio Code extension to highlight hardcoded secrets, passwords and API keys in your code using SecretScanner.",
-  "version": "1.0.2",
-  "publisher": "Kiara1616",
+  "description": "Detect hardcoded API keys, tokens and credentials locally before they reach your repository.",
+  "version": "1.0.6",
+  "publisher": "kiara",
   "license": "MIT",
   "repository": {
     "type": "git",
