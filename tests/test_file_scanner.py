@@ -6,7 +6,15 @@ Uses pytest's tmp_path fixture to create temporary files and directories.
 
 from pathlib import Path
 
-from secret_scanner.scanner.file_scanner import _is_text_file, _mask_secret, scan_path
+import pytest
+
+from secret_scanner.scanner.config import ScannerConfig
+from secret_scanner.scanner.file_scanner import (
+    _fingerprint,
+    _is_text_file,
+    _mask_secret,
+    scan_path,
+)
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -53,6 +61,10 @@ class TestIsTextFile:
 
 # ── scan_path – single file ────────────────────────────────────────────────
 class TestScanPathSingleFile:
+    def test_missing_path_raises_error(self, tmp_path):
+        with pytest.raises(FileNotFoundError):
+            scan_path(str(tmp_path / "missing"))
+
     def test_detects_aws_key_in_file(self, tmp_path):
         write_file(tmp_path, "config.py", 'key = "AKIAIOSFODNN7EXAMPLE"\n')
         findings = scan_path(str(tmp_path / "config.py"))
@@ -73,6 +85,8 @@ class TestScanPathSingleFile:
         assert "file" in f
         assert "line" in f
         assert "content" in f
+        assert f["fingerprint"].startswith("v1:")
+        assert "s3cr3t" not in f["fingerprint"]
 
     def test_finding_line_number_is_correct(self, tmp_path):
         content = "# header\n# blank\npassword = \"secret123\"\n"
@@ -86,6 +100,18 @@ class TestScanPathSingleFile:
         write_file(tmp_path, "clean.py", "x = 1\nprint(x)\n")
         findings = scan_path(str(tmp_path / "clean.py"))
         assert findings == []
+
+    def test_fingerprint_is_stable_when_line_moves(self, tmp_path):
+        path = write_file(tmp_path, "config.py", 'password = "secret123"\n')
+        first = scan_path(str(path))[0]["fingerprint"]
+        path.write_text('# comment\npassword = "secret123"\n', encoding="utf-8")
+        second = scan_path(str(path))[0]["fingerprint"]
+        assert first == second
+
+    def test_fingerprint_changes_with_path(self):
+        first = _fingerprint("Token", "a.py", "fake-token-value")
+        second = _fingerprint("Token", "b.py", "fake-token-value")
+        assert first != second
 
 
 # ── scan_path – directory ──────────────────────────────────────────────────
@@ -142,6 +168,27 @@ class TestScanPathDirectory:
         types_found = {f["type"] for f in findings}
         assert "Hardcoded Password" in types_found
         assert "Generic API Key" in types_found
+
+    def test_excludes_configured_path(self, tmp_path):
+        write_file(tmp_path, "ignored.py", 'password = "secret123"\n')
+        config = ScannerConfig(exclude_paths=("ignored.py",))
+        assert scan_path(str(tmp_path), config=config) == []
+
+    def test_allowlists_configured_path(self, tmp_path):
+        write_file(tmp_path, "fixture.py", 'password = "secret123"\n')
+        config = ScannerConfig(allowlist_paths=("fixture.py",))
+        assert scan_path(str(tmp_path), config=config) == []
+
+    def test_allowlists_matching_line(self, tmp_path):
+        write_file(tmp_path, "example.py", 'password = "example-only"\n')
+        config = ScannerConfig(allowlist_patterns=("example-only",))
+        assert scan_path(str(tmp_path), config=config) == []
+
+    def test_allowlists_fingerprint(self, tmp_path):
+        path = write_file(tmp_path, "config.py", 'password = "secret123"\n')
+        finding = scan_path(str(path))[0]
+        config = ScannerConfig(allowlist_fingerprints=frozenset({finding["fingerprint"]}))
+        assert scan_path(str(path), config=config) == []
 
 
 # ── scan_path – verbose mode ───────────────────────────────────────────────

@@ -1,127 +1,142 @@
-"""
-file_scanner.py – Recursive file scanner that applies PATTERNS to every
-                  readable text file found under a given path.
-"""
+"""Recursive, privacy-preserving secret scanner."""
 
+from __future__ import annotations
+
+import fnmatch
+import hashlib
 import os
 import re
 from pathlib import Path
 from typing import Any
 
+from secret_scanner.scanner.config import ScannerConfig
 from secret_scanner.scanner.patterns import PATTERNS
 
-# ── Constants ──────────────────────────────────────────────────────────────
 BINARY_EXTENSIONS: set[str] = {
     ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".ico", ".tiff",
-    ".exe", ".dll", ".so", ".dylib",
-    ".zip", ".tar", ".gz", ".bz2", ".rar", ".7z",
-    ".pdf", ".docx", ".xlsx", ".pptx",
+    ".exe", ".dll", ".so", ".dylib", ".zip", ".tar", ".gz",
+    ".bz2", ".rar", ".7z", ".pdf", ".docx", ".xlsx", ".pptx",
     ".pyc", ".pyo",
 }
 
 IGNORED_DIRS: set[str] = {
-    ".git", "__pycache__", "node_modules", "output",
-    ".venv", "venv", ".tox", "dist", "build", ".mypy_cache",
+    ".git", "__pycache__", "node_modules", "output", ".venv", "venv",
+    ".tox", "dist", "build", ".mypy_cache", ".ruff_cache",
 }
 
 
 def _mask_secret(text: str) -> str:
-    """Return the line with the middle portion of each token replaced by ***."""
-    # Mask every word longer than 6 chars that looks like a secret value
-    def _replace(m: re.Match) -> str:
-        s = m.group(0)
-        if len(s) <= 6:
-            return s
-        keep = max(3, len(s) // 5)
-        return s[:keep] + "***" + s[-keep:]
+    """Return text with every token-like value redacted."""
+    def _replace(match: re.Match[str]) -> str:
+        value = match.group(0)
+        if len(value) <= 6:
+            return value
+        keep = max(3, len(value) // 5)
+        return value[:keep] + "***" + value[-keep:]
 
     return re.sub(r"[A-Za-z0-9\+/=_\-]{7,}", _replace, text)
 
 
+def _fingerprint(secret_type: str, relative_path: str, value: str) -> str:
+    """Create a stable identifier without retaining the detected value."""
+    material = f"{secret_type}\0{relative_path}\0{value}".encode()
+    return "v1:" + hashlib.sha256(material).hexdigest()
+
+
 def _is_text_file(filepath: Path) -> bool:
-    """Return True if the file is likely a text file."""
+    """Return whether a file is likely to contain text."""
     if filepath.suffix.lower() in BINARY_EXTENSIONS:
         return False
     try:
-        with open(filepath, "rb") as fh:
-            chunk = fh.read(1024)
-        # If the chunk contains a null byte it is almost certainly binary
-        return b"\x00" not in chunk
+        with filepath.open("rb") as handle:
+            return b"\x00" not in handle.read(1024)
     except OSError:
         return False
 
 
-def scan_path(path: str, verbose: bool = False) -> list[dict[str, Any]]:
-    """
-    Recursively scan *path* for secrets.
-
-    Parameters
-    ----------
-    path : str
-        Directory or single file to scan.
-    verbose : bool
-        When True, print the name of each file as it is processed.
-
-    Returns
-    -------
-    list of dict
-        Each dict contains:
-            type     – pattern name (str)
-            severity – "HIGH" | "MEDIUM" | "LOW"
-            file     – relative (or absolute) path to the file (str)
-            line     – 1-based line number (int)
-            content  – masked line content (str)
-    """
-    findings: list[dict[str, Any]] = []
+def scan_path(
+    path: str,
+    verbose: bool = False,
+    config: ScannerConfig | None = None,
+) -> list[dict[str, Any]]:
+    """Scan a file or directory using an optional project policy."""
+    settings = config or ScannerConfig()
     root = Path(path).resolve()
+    if not root.exists():
+        raise FileNotFoundError(f"Scan target does not exist: {root}")
+    base_dir = root.parent if root.is_file() else root
+    files = [root] if root.is_file() else _walk_directory(root)
+    findings: list[dict[str, Any]] = []
+    allowlist_patterns = settings.compiled_allowlist_patterns()
 
-    # Build the list of files to inspect
-    if root.is_file():
-        files_to_scan = [root]
-    else:
-        files_to_scan = _walk_directory(root)
-
-    for filepath in files_to_scan:
+    for filepath in files:
+        relative_path = _relative_path(filepath, base_dir)
+        if _matches_any(relative_path, settings.exclude_paths):
+            continue
+        if _matches_any(relative_path, settings.allowlist_paths):
+            continue
         if not _is_text_file(filepath):
             continue
-
         if verbose:
-            print(f"  [scanning] {filepath}")
-
-        _scan_file(filepath, findings)
+            print(f"  [scanning] {relative_path}")
+        _scan_file(
+            filepath,
+            relative_path,
+            findings,
+            settings,
+            allowlist_patterns,
+        )
 
     return findings
 
 
+def _relative_path(filepath: Path, base_dir: Path) -> str:
+    try:
+        return filepath.relative_to(base_dir).as_posix()
+    except ValueError:
+        return filepath.as_posix()
+
+
+def _matches_any(relative_path: str, patterns: tuple[str, ...]) -> bool:
+    return any(fnmatch.fnmatch(relative_path, pattern) for pattern in patterns)
+
+
 def _walk_directory(root: Path) -> list[Path]:
-    """Walk *root* skipping ignored directories and return all file paths."""
+    """Walk a directory while pruning built-in ignored directories."""
     result: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
-        # Prune ignored directories in-place so os.walk won't descend into them
-        dirnames[:] = [
-            d for d in dirnames if d not in IGNORED_DIRS
-        ]
-        for filename in filenames:
-            result.append(Path(dirpath) / filename)
+        dirnames[:] = [directory for directory in dirnames if directory not in IGNORED_DIRS]
+        result.extend(Path(dirpath) / filename for filename in filenames)
     return result
 
 
-def _scan_file(filepath: Path, findings: list[dict[str, Any]]) -> None:
-    """Read *filepath* line-by-line and append any matches to *findings*."""
+def _scan_file(
+    filepath: Path,
+    relative_path: str,
+    findings: list[dict[str, Any]],
+    config: ScannerConfig,
+    allowlist_patterns: tuple[re.Pattern[str], ...],
+) -> None:
+    """Append non-allowlisted findings from one text file."""
     try:
-        with open(filepath, encoding="utf-8", errors="replace") as fh:
-            for lineno, line in enumerate(fh, start=1):
-                for pat in PATTERNS:
-                    if pat["pattern"].search(line):
+        with filepath.open(encoding="utf-8", errors="replace") as handle:
+            for line_number, line in enumerate(handle, start=1):
+                if any(pattern.search(line) for pattern in allowlist_patterns):
+                    continue
+                for detector in PATTERNS:
+                    for match in detector["pattern"].finditer(line):
+                        fingerprint = _fingerprint(detector["name"], relative_path, match.group(0))
+                        if fingerprint in config.allowlist_fingerprints:
+                            continue
                         findings.append(
                             {
-                                "type": pat["name"],
-                                "severity": pat["severity"],
-                                "file": str(filepath),
-                                "line": lineno,
+                                "type": detector["name"],
+                                "severity": detector["severity"],
+                                "file": relative_path,
+                                "line": line_number,
                                 "content": _mask_secret(line.rstrip()),
+                                "fingerprint": fingerprint,
                             }
                         )
     except OSError:
-        # Skip files we cannot open (permission errors, etc.)
-        pass
+        return

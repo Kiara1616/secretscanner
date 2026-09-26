@@ -23,6 +23,8 @@ $ secret-scanner --path .
 - **Local primero:** el código y los hallazgos permanecen en tu equipo.
 - **Un motor, varios flujos:** CLI, hook de Git, servidor MCP y extensión para VS Code.
 - **Listo para automatización:** códigos de salida apropiados y reportes JSON o CSV.
+- **Políticas por proyecto:** exclusiones, allowlists y baseline versionables.
+- **Privacidad verificable:** cada hallazgo tiene un fingerprint sin almacenar el secreto.
 - **Multiplataforma:** compatible con Windows, Linux y macOS mediante Python 3.10 o posterior.
 
 ## Inicio rápido
@@ -48,6 +50,9 @@ secret-scanner --path . --output csv
 
 # Mostrar cada archivo procesado
 secret-scanner --path . --verbose
+
+# Crear un baseline con los hallazgos existentes
+secret-scanner --path . --update-baseline
 ```
 
 | Opción | Descripción |
@@ -56,8 +61,43 @@ secret-scanner --path . --verbose
 | `--output json` | Guarda los hallazgos en `output/report.json`. |
 | `--output csv` | Guarda los hallazgos en `output/report.csv`. |
 | `--verbose` | Muestra los archivos a medida que se procesan. |
+| `--config PATH` | Utiliza una configuración TOML específica. |
+| `--baseline PATH` | Compara contra un baseline específico. |
+| `--update-baseline [PATH]` | Crea o reemplaza el baseline. |
 
 El proceso termina con código `1` si encuentra posibles secretos y `0` si no encuentra ninguno, por lo que puede utilizarse como control en CI.
+
+## Configuración por proyecto
+
+Copia [`.secretscanner.example.toml`](https://github.com/Kiara1616/secretscanner/blob/main/.secretscanner.example.toml) como `.secretscanner.toml` en la raíz del proyecto:
+
+```toml
+[scan]
+exclude_paths = ["vendor/**", "docs/generated/**"]
+
+[allowlist]
+paths = ["tests/fixtures/**"]
+patterns = ["EXAMPLE_ONLY_[A-Z0-9]+"]
+fingerprints = []
+
+[baseline]
+path = ".secretscanner-baseline.json"
+```
+
+La configuración más cercana al archivo analizado se descubre automáticamente. Las rutas utilizan `/` y aceptan patrones glob. Las expresiones de `allowlist.patterns` se evalúan sobre la línea completa; deben reservarse para valores de ejemplo deliberados.
+
+### Baseline y fingerprints
+
+Cada hallazgo contiene un fingerprint SHA-256 derivado del tipo, la ruta relativa y el valor detectado. El valor original nunca se guarda en el fingerprint ni en el baseline.
+
+Para adoptar SecretScanner en un proyecto con hallazgos conocidos:
+
+```bash
+secret-scanner --path . --update-baseline
+git add .secretscanner-baseline.json
+```
+
+Los análisis posteriores ocultarán esos hallazgos y fallarán únicamente ante secretos nuevos. Revisa siempre el archivo antes de confirmarlo y no uses el baseline para aceptar credenciales reales: deben revocarse y eliminarse.
 
 ## Detectores incluidos
 
@@ -81,7 +121,7 @@ Añade el hook al archivo `.pre-commit-config.yaml`. Sustituye `v1.0.2` por el r
 ```yaml
 repos:
   - repo: https://github.com/Kiara1616/secretscanner
-    rev: v1.0.2
+    rev: v1.1.0
     hooks:
       - id: secret-scanner
 ```
@@ -144,7 +184,7 @@ No publiques credenciales reales en issues, ejemplos ni reportes. Las vulnerabil
 
 ## Estado del proyecto
 
-La hoja de ruta inmediata incluye configuración por proyecto, allowlists, baseline, fingerprints, historial Git y salida SARIF. Consulta [CHANGELOG.md](CHANGELOG.md) para conocer los cambios publicados.
+La hoja de ruta inmediata incluye historial Git, detección por entropía y salida SARIF. Consulta [CHANGELOG.md](CHANGELOG.md) para conocer los cambios publicados.
 
 ## Licencia
 

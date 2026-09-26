@@ -2,7 +2,7 @@
   "name": "secret-scanner-pr",
   "displayName": "SecretScanner",
   "description": "Detect hardcoded API keys, tokens and credentials locally before they reach your repository.",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "publisher": "kiara",
   "license": "MIT",
   "repository": {

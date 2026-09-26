@@ -23,6 +23,18 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 from colorama import Fore, Style
 from colorama import init as colorama_init
 
+from secret_scanner import __version__
+from secret_scanner.scanner.baseline import (
+    BaselineError,
+    filter_baseline,
+    load_baseline,
+    write_baseline,
+)
+from secret_scanner.scanner.config import (
+    ConfigError,
+    load_config_for_target,
+    resolve_project_path,
+)
 from secret_scanner.scanner.file_scanner import scan_path
 from secret_scanner.scanner.reporter import export_csv, export_json
 
@@ -51,7 +63,7 @@ def _banner() -> None:
             Fore.CYAN + Style.BRIGHT,
         )
     )
-    print(_colored("  SecretScanner v1.0.2 - Hardcoded Secret Detector\n", Fore.WHITE))
+    print(_colored(f"  SecretScanner v{__version__} - Hardcoded Secret Detector\n", Fore.WHITE))
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -77,6 +89,24 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print each file as it is processed.",
     )
+    parser.add_argument(
+        "--config",
+        metavar="PATH",
+        help="Configuration file. Defaults to the closest .secretscanner.toml.",
+    )
+    parser.add_argument(
+        "--baseline",
+        metavar="PATH",
+        help="Baseline file. Defaults to .secretscanner-baseline.json when present.",
+    )
+    parser.add_argument(
+        "--update-baseline",
+        nargs="?",
+        const=".secretscanner-baseline.json",
+        metavar="PATH",
+        help="Create or replace a baseline, optionally at PATH.",
+    )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     return parser
 
 
@@ -162,7 +192,24 @@ def main() -> int:
     if args.verbose:
         print()
 
-    findings = scan_path(str(target), verbose=args.verbose)
+    try:
+        config = load_config_for_target(target, args.config)
+        findings = scan_path(str(target), verbose=args.verbose, config=config)
+
+        if args.update_baseline:
+            baseline_path = resolve_project_path(args.update_baseline, config, target)
+            write_baseline(baseline_path, findings)
+            print(_colored(f"  Baseline updated: {baseline_path}", Fore.GREEN))
+            return 0
+
+        baseline_value = args.baseline or config.baseline_path
+        baseline_path = resolve_project_path(baseline_value, config, target)
+        if baseline_path.is_file():
+            findings = filter_baseline(findings, load_baseline(baseline_path))
+            print(_colored(f"  Baseline: {baseline_path}", Fore.CYAN))
+    except (ConfigError, BaselineError) as exc:
+        print(_colored(f"  ERROR: {exc}", Fore.RED + Style.BRIGHT))
+        return 2
 
     total_files = _count_files(str(target))
 

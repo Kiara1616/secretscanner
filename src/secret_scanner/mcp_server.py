@@ -3,8 +3,12 @@ mcp_server.py - Servidor MCP para SecretScanner.
 Expone la funcionalidad de escaneo como una herramienta para Agentes de IA.
 """
 
+from pathlib import Path
+
 from mcp.server.fastmcp import FastMCP
 
+from secret_scanner.scanner.baseline import filter_baseline, load_baseline
+from secret_scanner.scanner.config import load_config_for_target, resolve_project_path
 from secret_scanner.scanner.file_scanner import scan_path
 
 # Inicializar el servidor MCP
@@ -22,7 +26,12 @@ def scan_secrets(target_path: str) -> str:
         Un resumen en texto plano de los secretos encontrados.
     """
     try:
-        findings = scan_path(target_path, verbose=False)
+        target = Path(target_path)
+        config = load_config_for_target(target)
+        findings = scan_path(target_path, verbose=False, config=config)
+        baseline_path = resolve_project_path(config.baseline_path, config, target)
+        if baseline_path.is_file():
+            findings = filter_baseline(findings, load_baseline(baseline_path))
     except Exception as e:
         return f"Error al escanear la ruta '{target_path}': {str(e)}"
     
